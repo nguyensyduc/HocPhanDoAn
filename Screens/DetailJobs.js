@@ -16,7 +16,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
     const [listDataJobsDone, setListDataJobsDone] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingAdd, setLoadingAdd] = useState(false);
-    const [loadingText, setLoadingText] = useState(true)
+    const [loadingText, setLoadingText] = useState(false)
     const [showModalAdd, setShowModalAdd] = useState(false)
     const [showModalChange, setShowModalChange] = useState(false)
     const [dateStart, setDateStart] = useState(new Date())
