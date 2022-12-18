@@ -18,7 +18,7 @@ const RegisterScreen = ({ route, navigation }) => {
         fetchData();
     }, [])
     const fetchData = async () => {
-        const request = await fetch(`http://${address}account`, {
+        const request = await fetch(`${address}account`, {
             method: 'GET',
         })
         const response = await request.json();

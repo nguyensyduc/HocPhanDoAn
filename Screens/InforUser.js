@@ -21,24 +21,24 @@ const InforUserScreen = ({ navigation, route }) => {
                 </View>
             </View> */}
             <View style={[styles.horizontalStyle,{paddingHorizontal:20, justifyContent:'center'}]}>
-                <Text style={{fontSize:20, marginRight:20}}>Tài khoản của:</Text>
-                <Text style={{fontSize:25, fontWeight:'bold'}}>{UserInfor.username}</Text>
+                <Text style={{fontSize:20, marginRight:20, color:'#000'}}>Tài khoản của:</Text>
+                <Text style={{fontSize:25, fontWeight:'bold', color:'#000'}}>{UserInfor.username}</Text>
             </View>
             
             <View style={{ flex: 1, backgroundColor: '#5D5C20', padding: 10, paddingTop: 20 }}>
                 <View style={{ flex: 1, backgroundColor: '#fff', borderRadius: 20, padding: 20 }}>
                     <ScrollView>
                         <View style={styles.horizontalStyle}>
-                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18 }}>Tên tài khoản:</Text>
-                            <Text style={{ width: '50%', fontSize: 16 }}>{UserInfor.name}</Text>
+                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18, color:'#000' }}>Tên tài khoản:</Text>
+                            <Text style={{ width: '50%', fontSize: 16, color:'#000' }}>{UserInfor.name}</Text>
                         </View>
                         <View style={styles.horizontalStyle}>
-                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18 }}>Mật khẩu: </Text>
+                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18, color:'#000' }}>Mật khẩu: </Text>
                             <View style={[styles.horizontalStyle, { width: '50%' }]}>
                                 {showPass ?
-                                    <Text style={{ width: '60%' }}>{UserInfor.pass}</Text>
+                                    <Text style={{ width: '60%', color:'#000' }}>{UserInfor.pass}</Text>
                                     :
-                                    <Text style={{ width: '60%', fontWeight: 'bold' }}>******</Text>
+                                    <Text style={{ width: '60%', fontWeight: 'bold', color:'#000' }}>******</Text>
                                 }
                                 {showPass ?
                                     <TouchableOpacity
@@ -56,12 +56,12 @@ const InforUserScreen = ({ navigation, route }) => {
                             </View>
                         </View>
                         <View style={styles.horizontalStyle}>
-                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18 }}>Số điện thoại:</Text>
+                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18, color:'#000' }}>Số điện thoại:</Text>
                             <View style={[styles.horizontalStyle, { width: '50%' }]}>
                                 {UserInfor.numberPhone ?
-                                    <Text style={{ width: '60%' }}>{UserInfor.numberPhone}</Text>
+                                    <Text style={{ width: '60%', color:'#000' }}>{UserInfor.numberPhone}</Text>
                                     :
-                                    <Text style={{ width: '60%' }}>Chưa có</Text>
+                                    <Text style={{ width: '60%', color:'#000' }}>Chưa có</Text>
                                 }
                                 <TouchableOpacity
                                     onPress={() => { setShowPass(false) }}
@@ -71,12 +71,12 @@ const InforUserScreen = ({ navigation, route }) => {
                             </View>
                         </View>
                         <View style={styles.horizontalStyle}>
-                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18 }}>Email:</Text>
+                            <Text style={{ width: '50%', fontWeight: 'bold', fontSize: 18, color:'#000' }}>Email:</Text>
                             <View style={[styles.horizontalStyle, { width: '50%' }]}>
                                 {UserInfor.email ?
-                                    <Text style={{ width: '60%' }}>{UserInfor.email}</Text>
+                                    <Text style={{ width: '60%', color:'#000' }}>{UserInfor.email}</Text>
                                     :
-                                    <Text style={{ width: '60%' }}>Chưa có</Text>
+                                    <Text style={{ width: '60%', color:'#000' }}>Chưa có</Text>
                                 }
                                 <TouchableOpacity
                                     onPress={() => { setShowPass(false) }}
@@ -100,17 +100,17 @@ const InforUserScreen = ({ navigation, route }) => {
                         {   showMore ?
                             <View>
                                 <View style={styles.buttonOptions}>
-                                    <Text style={{ fontSize: 15 }}>Đổi mật khẩu</Text>
+                                    <Text style={{ fontSize: 15, color:'#000' }}>Đổi mật khẩu</Text>
                                 </View>
                                 <View style={styles.buttonOptions}>
-                                    <Text style={{ fontSize: 15 }}>Chuyển tài khoản</Text>
+                                    <Text style={{ fontSize: 15, color:'#000' }}>Chuyển tài khoản</Text>
                                 </View>
                                 <View style={styles.buttonOptions}>
-                                    <Text style={{ fontSize: 15 }}>Đăng xuất</Text>
+                                    <Text style={{ fontSize: 15, color:'#000' }}>Đăng xuất</Text>
                                 </View>
                             </View>
                             :
-                            <Text style={{ textAlign: 'center' }}>Cài đặt</Text>
+                            <Text style={{ textAlign: 'center', color:'#000' }}>Cài đặt</Text>
                         }
                     </ScrollView>
                 </View>

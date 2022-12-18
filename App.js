@@ -21,6 +21,7 @@ import { Provider } from 'react-redux'
 import store from './Store/store';
 import { NavigationContainer } from '@react-navigation/native'
 import SplashScreen from 'react-native-splash-screen'
+import LinearGradient from 'react-native-linear-gradient';
 import {
   Colors,
   DebugInstructions,
@@ -71,9 +72,11 @@ const App: () => Node = () => {
   return (
     <Provider store={store}>
       <FlashMessage position='top'></FlashMessage>
-      <NavigationContainer>
-        <NavigatorScreen></NavigatorScreen>
-      </NavigationContainer>
+      {/* <LinearGradient colors={['red', 'blue']}> */}
+        <NavigationContainer>
+          <NavigatorScreen></NavigatorScreen>
+        </NavigationContainer>
+      {/* </LinearGradient> */}
     </Provider>
   );
 };

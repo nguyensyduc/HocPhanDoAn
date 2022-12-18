@@ -9,7 +9,9 @@ const userSlice = createSlice({
         idJobs: '',
         userInfor: {},
         listJob: [],
-        listText: []
+        listText: [],
+        listUser: [],
+        currentUser: {}
     },
     reducers:{
         setCurrentUser:(state, action)=>{
@@ -25,8 +27,14 @@ const userSlice = createSlice({
         },
         setCurrentComment:(state, action)=>{
             state.listText = action.payload.listText
+        },
+        setListUser:(state, action) =>{
+            state.listUser = action.payload.listUser
+        },
+        setCurrentUserDetail: (state, action)=>{
+            state.currentUser = action.payload.currentUser
         }
     }
 })
 export default userSlice.reducer;
-export const {setCurrentUser, setCurrentListJob, setCurrentJobs, setCurrentComment} = userSlice.actions;
+export const {setCurrentUser, setCurrentListJob, setCurrentJobs, setCurrentComment, setListUser, setCurrentUserDetail} = userSlice.actions;

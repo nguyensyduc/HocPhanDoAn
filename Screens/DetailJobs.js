@@ -8,13 +8,14 @@ import moment from "moment";
 import { showMessage } from "react-native-flash-message";
 import Carousel from "react-native-snap-carousel";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentComment } from "../Store/userSlice";
+import { setCurrentComment, setCurrentUserDetail } from "../Store/userSlice";
 const DetailJobsScreen = ({ navigation, route }) => {
     const [sliceCurrent, setSliceCurrent] = useState(0);
     const [listDataJobsPlan, setListDataJobsPlan] = useState([]);
     const [listDataJobsDoing, setListDataJobsDoing] = useState([]);
     const [listDataJobsDone, setListDataJobsDone] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingUser, setLoadingUser] = useState(true);
     const [loadingAdd, setLoadingAdd] = useState(false);
     const [loadingText, setLoadingText] = useState(false)
     const [showModalAdd, setShowModalAdd] = useState(false)
@@ -29,6 +30,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
     const inforJob = route.params.inforJobs;
     const userInfor = route.params.userInfor;
     const [successAdd, setSuccessAdd] = useState(0)
+    const [successInvited, setSuccessInvited] = useState(0)
     const [CurrentId, setCurrentId] = useState({});
     const [seeMoreJob, setSeeMoreJob] = useState(false);
     const [showOptionSeeMore, setShowOptionSeeMore] = useState(false)
@@ -36,20 +38,123 @@ const DetailJobsScreen = ({ navigation, route }) => {
     const [showInvite, setShowInvite] = useState(false)
     let reff = useRef()
     const [textComment, setTextComment] = useState('');
+    const [currentMember, setCurrentMember] = useState({})
+    const [textInviteMember, setTextInviteMember] = useState('')
     const dispatch = useDispatch();
     const selector = useSelector(state => state.user)
+    const [listUser, setListUser] = useState([])
+    const [listUserName, setListUserName] = useState([])
     useEffect(() => {
         getDataPlan();
         getComment();
+        getListUser();
+        console.log('listttttttt123 ', selector.listUser);
     }, [successAdd]);
 
     useEffect(() => {
         const reload = navigation.addListener('focus', () => {
             getDataPlan();
             getComment();
+            getListUser();
         })
         return reload
     }, [navigation])
+
+    useEffect(() => {
+        getDataPlan();
+        getComment();
+        getListUser();
+    }, [successInvited])
+
+    const getListUser = async () => {
+        setLoadingUser(true)
+        let isExists = 0;
+        inforJob.members?.map((item) => {
+            if (item == inforJob.creater) {
+                isExists = 1
+            }
+        })
+        if (isExists == 0) {
+            inforJob.members?.push(inforJob.creater);
+        }
+        setTimeout(() => {
+            setListUser(inforJob.members)
+            let _listUserName = []
+            inforJob.members?.map((item) => {
+                selector.listUser?.map((itemUser) => {
+                    if (item == itemUser.name) {
+                        _listUserName?.push({ name: item, username: itemUser.username })
+                    }
+                })
+            })
+            let mainUser = {}
+            _listUserName?.map((user, index) => {
+                if (user.name == userInfor.name) {
+                    _listUserName.splice(index, 1)
+                    mainUser = user
+                }
+            })
+            _listUserName.unshift(mainUser)
+            setListUserName(_listUserName)
+            setLoadingUser(false)
+        }, 1000);
+    }
+
+    const inviterMember = async () => {
+
+        const request = await fetch(`${address}jobs`, {
+            method: 'GET',
+        })
+        const response = await request.json();
+        console.log('response eeeee ', response);
+        let listMember = []
+        response.data.map(e => {
+            if (e.idJobs == inforJob.idJobs) {
+                listMember = e.members;
+                return;
+            }
+        })
+        console.log('listtt membersss ', listMember);
+        let isInvited = '';
+        let listInvited = listUserName;
+        listUserName.map((item) => {
+            isInvited += item.name
+        })
+        if (!currentMember.name) {
+            Alert.alert('Hay chon thanh vien')
+            return
+        }
+        if (isInvited.includes(currentMember.name)) {
+            Alert.alert('da ton tai')
+            return
+        }
+        let userItem = currentMember.name
+        listMember.push(userItem)
+        console.log('okeeeeeeeee 123', inforJob);
+        const body = {
+            "members": listMember
+        }
+        const _request = await fetch(`${address}jobs/edit/${inforJob.idJobs}`, {
+            method: 'PUT',
+            body: JSON.stringify(body),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        })
+        const res = await _request.json();
+        console.log('resssssss ', res);
+        if (res.success) {
+            setCurrentMember({});
+            setShowInvite(false)
+            setSuccessInvited(e => e + 1);
+            navigation.goBack()
+            showMessage({
+                message: `Mời thành công ${currentMember.username} vào ${inforJob.name}`,
+                type: 'success',
+                duration: 4000
+            })
+        }
+    }
 
     const getDataPlan = async () => {
         const request = await fetch(`${address}detailjobs`, {
@@ -58,38 +163,11 @@ const DetailJobsScreen = ({ navigation, route }) => {
         const res = await request.json();
         let listJobsPlan = []
         res.data.forEach((job) => {
-            if (job.idJob == inforJob.idJobs && job.status == 'plan') {
-                listJobsPlan.push(job);
+            if (job.idJob == inforJob.idJobs) {
+                listJobsPlan?.push(job);
             }
         })
-        setLoading(true)
-        setTimeout(() => {
-            setListDataJobsPlan(listJobsPlan)
-            setLoading(false)
-        }, 1);
-
-        let listJobsDoing = []
-        res.data.forEach((job) => {
-            if (job.idJob == inforJob.idJobs && job.status == 'doing') {
-                listJobsDoing.push(job);
-            }
-        })
-        setLoading(true)
-        setTimeout(() => {
-            setListDataJobsDoing(listJobsDoing)
-            setLoading(false)
-        }, 1);
-        let listJobsDone = []
-        res.data.forEach((job) => {
-            if (job.idJob == inforJob.idJobs && job.status == 'done') {
-                listJobsDone.push(job);
-            }
-        })
-        setLoading(true)
-        setTimeout(() => {
-            setListDataJobsDone(listJobsDone)
-            setLoading(false)
-        }, 1);
+        setListDataJobsPlan(listJobsPlan)
 
     }
     const getComment = async () => {
@@ -100,7 +178,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
         const res = await request.json();
         let _listComment = [];
         for (let item = res.data.length - 1; item > 0; item--) {
-            _listComment.push(res.data[item])
+            _listComment?.push(res.data[item])
         }
         setTimeout(() => {
             const payload = { listText: _listComment }
@@ -110,6 +188,10 @@ const DetailJobsScreen = ({ navigation, route }) => {
         }, 10);
     }
     const addPlanJob = async () => {
+        if (countEnd == 0 || countStart == 0 || nameJob == '') {
+            Alert.alert('Thông báo', 'Không được bỏ trống thông tin')
+            return;
+        }
         setLoadingAdd(true)
         const body = {
             "nameDetailJob": nameJob.trim(),
@@ -126,22 +208,17 @@ const DetailJobsScreen = ({ navigation, route }) => {
             }
         })
         const res = await request.json();
-        if (countEnd == 0 || countStart == 0 || nameJob == '') {
-            Alert.alert('Thông báo', 'Không được bỏ trống thông tin')
-        }
-        else {
-            if (res.success) {
-                setSuccessAdd(e => e + 1);
-                setShowModalAdd(false);
-                setCountEnd(0);
-                setCountStart(0);
-                setNameJob('')
-                showMessage({
-                    message: 'Thêm thành công 1 thẻ công việc',
-                    type: 'success'
-                })
-                setLoadingAdd(false)
-            }
+        if (res.success) {
+            setSuccessAdd(e => e + 1);
+            setShowModalAdd(false);
+            setCountEnd(0);
+            setCountStart(0);
+            setNameJob('')
+            showMessage({
+                message: 'Thêm thành công 1 thẻ công việc',
+                type: 'success'
+            })
+            setLoadingAdd(false)
         }
 
     }
@@ -181,12 +258,12 @@ const DetailJobsScreen = ({ navigation, route }) => {
                                     <TouchableOpacity
                                         onPress={() => { setShowModalStart(false) }}
                                         style={[styles.buttonStyle, { borderColor: 'red', marginRight: 20 }]}>
-                                        <Text style={{ color: 'red', fontWeight: 'bold' }}>Huỷ</Text>
+                                        <Text style={{ color: 'red', fontWeight: 'bold', color: '#000' }}>Huỷ</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => PickStartDate()}
                                         style={[styles.buttonStyle, { borderColor: 'green' }]}>
-                                        <Text style={{ color: 'green', fontWeight: 'bold' }}>Đồng ý</Text>
+                                        <Text style={{ color: 'green', fontWeight: 'bold', color: '#000' }}>Đồng ý</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -282,7 +359,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
                         <Image source={require('../assets/icons8-close-100.png')} style={{ width: 20, height: 20 }}></Image>
                     </TouchableOpacity>
                     <View style={{ borderBottomWidth: 2, paddingBottom: 10, marginHorizontal: 50 }}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>Chuyển đổi công việc</Text>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', color: '#000' }}>Chuyển đổi công việc</Text>
                     </View>
                     {
                         <TouchableOpacity
@@ -419,7 +496,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
                                 style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20, width: '10%' }}>
                                 <Image source={require('../assets/icons8-close-100.png')} style={{ width: 20, height: 20 }}></Image>
                             </TouchableOpacity>
-                            <Text style={{ fontSize: 20, fontWeight: '600', width: '75%' }}>{CurrentId.nameDetailJob}</Text>
+                            <Text style={{ fontSize: 20, fontWeight: '600', width: '75%', color: '#000' }}>{CurrentId.nameDetailJob}</Text>
                         </View>
                         <TouchableOpacity
                             onPress={() => setShowOptionSeeMore(true)}
@@ -479,7 +556,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
                     </ReactNativeModal>
                     <View style={[styles.seeMoreStyle, { borderBottomWidth: 1, paddingTop: 0, flexDirection: 'row', alignItems: 'center' }]}>
                         {/* <Text style={{fontSize:20, fontWeight:'600'}}>Name detail job</Text> */}
-                        <Text style={{ fontSize: 17, width: '50%' }}>{inforJob.name}:</Text>
+                        <Text style={{ fontSize: 17, width: '50%', color: '#000' }}>{inforJob.name}:</Text>
                         <Text style={{ fontSize: 17, width: '50%', color: 'gray' }}>{CurrentId.status == 'plan'
                             ? 'Những việc cần làm'
                             : (CurrentId.status == 'doing'
@@ -493,17 +570,17 @@ const DetailJobsScreen = ({ navigation, route }) => {
                     <View style={styles.seeMoreStyle}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                             <Image source={require('../assets/clock.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
-                            <Text style={{ fontSize: 16 }}>Bắt đầu: {moment(CurrentId.startTime).format('DD/MM/yyyy')}</Text>
+                            <Text style={{ fontSize: 16, color: '#000' }}>Bắt đầu: {moment(CurrentId.startTime).format('DD/MM/yyyy')}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image source={require('../assets/clock.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
-                            <Text style={{ fontSize: 16 }}>Hết hạn: {moment(CurrentId.endTime).format('DD/MM/yyyy')}</Text>
+                            <Text style={{ fontSize: 16, color: '#000' }}>Hết hạn: {moment(CurrentId.endTime).format('DD/MM/yyyy')}</Text>
                         </View>
                     </View>
                     <View style={{ height: 10, backgroundColor: 'lightgray' }}></View>
                     <View style={styles.seeMoreStyle}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text style={{ fontSize: 16 }}>Thành viên:</Text>
+                            <Text style={{ fontSize: 16, color: '#000' }}>Thành viên:</Text>
                             <TouchableOpacity
                                 onPress={() => setShowInvite(true)}
                                 style={{ alignItems: 'center', padding: 5 }}>
@@ -517,7 +594,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
                                 isVisible={showInvite}>
                                 <View style={{ backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 10 }}>
                                     <View style={{ borderBottomWidth: 2, marginBottom: 20, marginHorizontal: 40 }}>
-                                        <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center' }}>Mời thành viên</Text>
+                                        <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center', color: '#000' }}>Mời thành viên</Text>
                                     </View>
                                     <View style={[styles.inputView, styles.horizontalView]}>
                                         <Image
@@ -529,16 +606,16 @@ const DetailJobsScreen = ({ navigation, route }) => {
                                             style={{ flex: 1, height: 50, fontSize: 20 }}></TextInput>
                                     </View>
                                     <TouchableOpacity style={[styles.buttonStyle, { alignSelf: 'center', marginTop: 10, paddingVertical: 15, backgroundColor: '#209DBC' }]}>
-                                        <Text style={{ fontSize: 17 }}>Mời</Text>
+                                        <Text style={{ fontSize: 17, color: '#000' }}>Mời</Text>
                                     </TouchableOpacity>
                                 </View>
                             </ReactNativeModal>
                         </View>
-                        <Text style={{ fontSize: 16, paddingHorizontal: 10 }}>{inforJob.creater}</Text>
+                        <Text style={{ fontSize: 16, paddingHorizontal: 10, color: '#000' }}>{inforJob.creater}</Text>
                     </View>
                     <View style={{ height: 10, backgroundColor: 'lightgray' }}></View>
                     <View style={[styles.seeMoreStyle, { height: Dimensions.get('window').height * 0.4 }]}>
-                        <Text style={{ fontSize: 16 }}>Bình luận:</Text>
+                        <Text style={{ fontSize: 16, color: '#000' }}>Bình luận:</Text>
                         {/* {loadingText ?
                             <View>
                                 <ActivityIndicator size='large' color='#000'></ActivityIndicator>
@@ -556,12 +633,12 @@ const DetailJobsScreen = ({ navigation, route }) => {
                                             {item.idDetailJob == CurrentId.idDetailJob
                                                 ?
                                                 <View>
-                                                    <Text style={{ alignSelf: item.username == userInfor.name ? 'flex-end' : 'flex-start' }}>{item.username}</Text>
+                                                    <Text style={{ alignSelf: item.username == userInfor.name ? 'flex-end' : 'flex-start', color: '#000' }}>{item.username}</Text>
                                                     <TouchableOpacity
                                                         onPress={() => seeTimeClick(item.idText)}
                                                         activeOpacity={0.8}
                                                         style={{ backgroundColor: item.username == userInfor.name ? '#209DBC' : 'lightgray', alignSelf: item.username == userInfor.name ? 'flex-end' : 'flex-start', padding: 10, borderRadius: 10, marginTop: 5 }}>
-                                                        <Text>{item.message}</Text>
+                                                        <Text style={{ color: '#000' }}>{item.message}</Text>
                                                     </TouchableOpacity>
                                                     {
                                                         seeTime[item.idText]
@@ -615,173 +692,133 @@ const DetailJobsScreen = ({ navigation, route }) => {
         )
     }
 
+    const showModalInvite = () => {
+        return (
+            <ReactNativeModal
+                animationIn='fadeInDown'
+                backdropOpacity={0.5}
+                onBackdropPress={() => { setShowInvite(false), setCurrentMember({}) }}
+                style={{ width: Dimensions.get('window').width, alignSelf: 'center' }}
+                isVisible={showInvite}>
+                <View style={{ backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 10 }}>
+                    <View style={{ borderBottomWidth: 2, marginBottom: 20, marginHorizontal: 40 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center', color: '#000' }}>Mời thành viên</Text>
+                    </View>
+                    <View style={[styles.inputView, styles.horizontalView]}>
+                        {/* <Image
+                            source={require('../assets/search.png')}
+                            style={{ width: 30, height: 30, marginRight: 20 }}></Image>
+                        <TextInput
+                            onChangeText={(text)=>setTextInviteMember(text)}
+                            placeholderTextColor="#696767"
+                            placeholder="Nhập tên..."
+                            style={{ flex: 1, height: 50, fontSize: 20 }}></TextInput> */}
+                        <FlatList
+                            style={{ maxHeight: 200 }}
+                            data={selector.listUser}
+                            renderItem={({ item }) =>
+                                <TouchableOpacity
+                                    onPress={() => setCurrentMember(item)}
+                                    style={{ margin: 10, borderWidth: 0.5, padding: 10, borderRadius: 5, backgroundColor: '#fff', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <Text>{item.username}</Text>
+                                    {
+                                        currentMember.name == item.name ?
+                                            <Image source={require('../assets/ischeck.png')} style={{ width: 20, height: 20 }} />
+                                            : null
+                                    }
+                                </TouchableOpacity>
+                            }
+                            keyExtractor={(item) => `${item._id}`} />
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => inviterMember()}
+                        style={[styles.buttonStyle, { alignSelf: 'center', marginTop: 10, paddingVertical: 15, backgroundColor: '#209DBC' }]}>
+                        <Text style={{ fontSize: 17, color: '#000' }}>Mời</Text>
+                    </TouchableOpacity>
+                </View>
+            </ReactNativeModal>
+        )
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={{ flex: 1 }}>
-                <Swiper
-                    index={sliceCurrent}
-                    activeDotColor='#209DBC'
-                    loop={false}
-                    onIndexChanged={(item) => {
-                        setSliceCurrent(item)
-                    }}>
-                    <View style={styles.stateJobs}>
-                        <View style={{ borderBottomWidth: 2, paddingBottom: 10, marginBottom: 10 }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Những việc cần làm</Text>
-                        </View>
-                        {showModalSeeMoreJob()}
-                        {loading ?
-                            <View>
-                                <ActivityIndicator size='large' color='#405A11'></ActivityIndicator>
-                            </View>
-                            :
-                            <FlatList
-                                data={listDataJobsPlan}
-                                renderItem={({ item }) => {
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                setSeeMoreJob(true); setCurrentId(item);
-                                                // setTimeout(() => {
-                                                //     reff.current._listRef._scrollRef.scrollToEnd(1)
-                                                // }, 10);
-                                            }}
-                                            style={[styles.taskStyle]}>
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                                <Text style={{ fontSize: 16, width: '85%' }}>{item.nameDetailJob}</Text>
-                                                <TouchableOpacity
-                                                    onPress={() => { setShowModalChange(true); setCurrentId(item) }}
-                                                    // onPress={() => console.log(item.idDetailJob)}
-                                                    style={{ width: '10%', alignItems: 'center', padding: 5 }}>
-                                                    <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                </TouchableOpacity>
-                                                {showOption()}
-                                            </View>
-                                            <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
-                                                <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 20, height: 20, marginRight: 10 }}></Image>
-                                                <Text style={{ fontSize: 12 }}>{moment(item.startTime).format('DD/MM/yyyy')} - {moment(item.endTime).format('DD/MM/yyyy')}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    )
-                                }
-                                } />
-                        }
-                        <TouchableOpacity
-                            onPress={() => setShowModalAdd(true)}>
-                            <Text>+ Thêm thẻ</Text>
-                        </TouchableOpacity>
-                        {showAddJob()}
+                {loadingUser ?
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <ActivityIndicator size={"large"} color={"#405A11"} />
                     </View>
-                    <View style={styles.stateJobs}>
-                        <View style={{ borderBottomWidth: 2, paddingBottom: 10, marginBottom: 10 }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Những việc đang làm</Text>
-                        </View>
-                        {loading ?
-                            <View>
-                                <ActivityIndicator size='large' color='#405A11'></ActivityIndicator>
-                            </View>
-                            :
-                            <FlatList
-                                data={listDataJobsDoing}
-                                renderItem={({ item }) => {
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                setSeeMoreJob(true); setCurrentId(item);
-                                            }}
-                                            style={[styles.taskStyle]}>
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                                <Text style={{ fontSize: 16, width: '85%' }}>{item.nameDetailJob}</Text>
-                                                <TouchableOpacity
-                                                    onPress={() => { setShowModalChange(true); setCurrentId(item) }}
-                                                    style={{ width: '10%' }}>
-                                                    <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                </TouchableOpacity>
-                                            </View>
-                                            <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
-                                                <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 20, height: 20, marginRight: 10 }}></Image>
-                                                <Text style={{ fontSize: 12 }}>{moment(item.startTime).format('DD/MM/yyyy')} - {moment(item.endTime).format('DD/MM/yyyy')}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    )
-                                }
-                                } />
-                        }
-                        <TouchableOpacity
-                            onPress={() => setShowModalAdd(true)}>
-                            <Text>+ Thêm thẻ</Text>
-                        </TouchableOpacity>
-                        {showAddJob()}
-                    </View>
-                    <View style={styles.stateJobs}>
-                        <View style={{ borderBottomWidth: 2, paddingBottom: 10, marginBottom: 10 }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Xong</Text>
-                        </View>
-                        {loading ?
-                            <View>
-                                <ActivityIndicator size='large' color='#405A11'></ActivityIndicator>
-                            </View>
-                            :
-                            <FlatList
-                                data={listDataJobsDone}
-                                renderItem={({ item }) => {
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => { setSeeMoreJob(true); setCurrentId(item) }}
-                                            style={[styles.taskStyle]}>
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                                <Text style={{ fontSize: 16, width: '85%' }}>{item.nameDetailJob}</Text>
-                                                {/* <TouchableOpacity style={{ width: '10%' }}>
-                                                    <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                </TouchableOpacity> */}
-                                            </View>
-                                            <View style={[styles.timeLineStyle, { backgroundColor: '#fff' }]}>
-                                                <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 20, height: 20, marginRight: 10 }}></Image>
-                                                <Text style={{ fontSize: 12 }}>{moment(item.startTime).format('DD/MM/yyyy')} - {moment(item.endTime).format('DD/MM/yyyy')}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    )
-                                }
-                                } />
-                        }
-                    </View>
-                </Swiper>
-                {/* <Carousel
-                    data={listDataJobsPlan}
-                    renderItem={({ item }) => {
-                        return (
+                    :
+                    <FlatList
+                        numColumns={1}
+                        data={listUserName}
+                        style={{ flex: 1, margin: 10 }}
+                        renderItem={({ item }) =>
                             <TouchableOpacity
-                                onPress={() => { setSeeMoreJob(true); setCurrentId(item) }}
-                                style={[styles.taskStyle]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                    <Text style={{ fontSize: 16, width: '85%' }}>{item.nameDetailJob}</Text>
-                                    <TouchableOpacity
-                                        onPress={() => { setShowModalChange(true); setCurrentId(item) }}
-                                        // onPress={() => console.log(item.idDetailJob)}
-                                        style={{ width: '10%', alignItems: 'center', padding: 5 }}>
-                                        <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                    </TouchableOpacity>
-                                    {showOption()}
-                                </View>
-                                <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
-                                    <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 20, height: 20, marginRight: 10 }}></Image>
-                                    <Text style={{ fontSize: 12 }}>{moment(item.startTime).format('DD/MM/yyyy')} - {moment(item.endTime).format('DD/MM/yyyy')}</Text>
-                                </View>
+                                onPress={() => {
+                                    const payload = { currentUser: item }
+                                    dispatch(setCurrentUserDetail(payload))
+                                    navigation.navigate('DetailJobsUserScreen', { inforJob: inforJob, itemUser: item });
+                                }}
+                                style={styles.userStyle}>
+                                <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#000' }}>{item.username} {item.name == userInfor.name ? '(Bạn)' : ''}</Text>
+                                {
+                                    // listDataJobsPlan.members ?
+                                    //     <View>oke</View>
+                                    //     :
+                                    //     <View>
+                                    //         <Text>oke</Text>
+                                    //     </View>
+                                    listDataJobsPlan?.map((e) => {
+                                        if (e.members) {
+                                            if (item.name == e.members && (e.status == 'doing' || e.status == 'plan')) {
+                                                return (
+                                                    <View style={[styles.userJobs]}>
+                                                        <View style={styles.horizontalView}>
+                                                            <Text style={{ flex: 7, color: '#000' }}>{e.nameDetailJob}</Text>
+                                                            <TouchableOpacity style={styles.statusJob}>
+                                                                <View style={[styles.borderStatus, { backgroundColor: e.status == 'plan' ? '#FA9016' : '#2396F4' }]}>
+                                                                    <Text>{e.status}</Text>
+                                                                </View>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                        <Text style={{ color: new Date().setHours(0, 0, 0, 0) > new Date(e.endTime).setHours(0, 0, 0, 0) ? 'red' : '#000' }}>{moment(e.startTime).format('DD/MM/YYYY')} - {moment(e.endTime).format('DD/MM/YYYY')}</Text>
+                                                    </View>
+                                                )
+                                            }
+                                        } else {
+                                            if (item.name == e.creater && (e.status == 'doing' || e.status == 'plan')) {
+                                                return (
+                                                    <View style={[styles.userJobs]}>
+                                                        <View style={styles.horizontalView}>
+                                                            <Text style={{ flex: 7, color: '#000' }}>{e.nameDetailJob}</Text>
+                                                            <TouchableOpacity style={styles.statusJob}>
+                                                                <View style={[styles.borderStatus, { backgroundColor: e.status == 'plan' ? '#FA9016' : '#2396F4' }]}>
+                                                                    <Text>{e.status}</Text>
+                                                                </View>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                        <Text style={{ color: new Date().setHours(0, 0, 0, 0) > new Date(e.endTime).setHours(0, 0, 0, 0) ? 'red' : '#000' }}>{moment(e.startTime).format('DD/MM/YYYY')} - {moment(e.endTime).format('DD/MM/YYYY')}</Text>
+                                                    </View>
+                                                )
+                                            }
+                                        }
+                                    })
+                                }
                             </TouchableOpacity>
-                        )
-                    }} 
-                    sliderWidth={Dimensions.get('window').width}
-                    itemWidth={Dimensions.get('window').width*0.7}/> */}
-                <View style={{ paddingHorizontal: 30, marginBottom: 20 }}>
-                    <Text style={{ color: 'red', fontStyle: 'italic', marginBottom: 10, fontSize: 15 }}>* Lưu ý:</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10 }}>
-                        <View style={{ width: 30, height: 30, borderRadius: 30 / 2, backgroundColor: '#FE897C', marginRight: 10 }}></View>
-                        <Text>Thẻ quá hạn</Text>
-                    </View>
+                        }
+                        keyExtractor={(item, index) => `${index}`}
+                    />
+                }
+                <View style={{ paddingHorizontal: 50 }}>
+                    <TouchableOpacity
+                        onPress={() => setShowInvite(true)}
+                        style={{ margin: 5, alignItems: 'center', padding: 10, borderWidth: 1, borderRadius: 5 }}>
+                        <Text>Mời thành viên</Text>
+                    </TouchableOpacity>
+                    {showModalInvite()}
                 </View>
-                {showModalSeeMoreJob()}
-            </View >
-        </SafeAreaView >
+            </View>
+        </SafeAreaView>
     )
 }
 export default DetailJobsScreen
@@ -855,5 +892,37 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-
+    userStyle: {
+        flex: 2,
+        backgroundColor: '#fff',
+        margin: 10,
+        padding: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        // borderWidth: 0.2,
+        shadowOffset: { width: 0, height: 7 },
+        elevation: 5
+    },
+    userJobs: {
+        backgroundColor: '#eee',
+        borderBottomWidth: 3,
+        marginVertical: 10,
+        marginHorizontal: 20,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+    },
+    statusJob: {
+        flex: 2,
+        paddingVertical: 10,
+        alignItems: 'flex-end',
+    },
+    borderStatus: {
+        borderWidth: 0.7,
+        width: 60,
+        paddingHorizontal: 10,
+        padding: 5,
+        borderRadius: 5
+    }
 })

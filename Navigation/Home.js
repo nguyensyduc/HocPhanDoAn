@@ -8,16 +8,16 @@ const BottomTabs = createBottomTabNavigator();
 const windowWidth = Dimensions.get('window').width;
 const HomeScreen = ({ route }) => {
     return (
-        <BottomTabs.Navigator screenOptions={{ headerShown: false, tabBarStyle: {backgroundColor:'#A4A243', paddingBottom:30, borderTopWidth:0, height:2 } }}>
+        <BottomTabs.Navigator screenOptions={{ headerShown: false, tabBarStyle: { backgroundColor: '#fff', paddingBottom: 30, borderTopWidth: 0, height: 2 } }}>
             <BottomTabs.Screen name="NewHomeScreen" component={NewHomeScreen}
                 options={{
                     title: '',
                     tabBarIcon: ({ focused }) => {
                         return (
-                            <View style={{ backgroundColor: '#A4A243', width: windowWidth*0.4, alignItems: 'center', paddingBottom: 90 }}>
-                                <View style={{width: 50, height: 50, alignItems:'center', justifyContent:'center'}}>
+                            <View style={{ backgroundColor: '#fff', width: windowWidth * 0.4, alignItems: 'center', paddingBottom: 100, borderTopWidth:2 }}>
+                                <View style={{ width: 50, height: 50, alignItems: 'center', justifyContent: 'center' }}>
                                     <View style={{ width: 45, height: 45, borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                        <Image source={require('../assets/icons8-home-90.png')} style={{ width: 35, height: 35, tintColor: focused ? '#383705' : '#fff' }}></Image>
+                                        <Image source={require('../assets/icons8-home-90.png')} style={{ width: 35, height: 35, tintColor: focused ? '#4E6C50' : '#E6CBA8' }}></Image>
                                     </View>
                                 </View>
                             </View>
@@ -28,18 +28,12 @@ const HomeScreen = ({ route }) => {
             <BottomTabs.Screen name="JobScreen" component={JobScreen}
                 options={{
                     title: '',
-                    tabBarIcon: ({focused}) => {
+                    tabBarIcon: ({ focused }) => {
                         return (
-                            <View style={{ alignItems: 'center', justifyContent: 'center', width: windowWidth*0.3, paddingBottom:90 }}>
-                                <View style={{ position: 'absolute', paddingBottom: 90 }}>
-                                    <View style={{ alignSelf: 'center', width: 60, height: 60, borderRadius: 30, backgroundColor: focused ? '#5D5C20' : '#A4A243', alignItems: 'center', justifyContent: 'center', borderWidth: 2, shadowColor:'#000' }}>
-                                        <Image source={require('../assets/icons8-business-90.png')} style={{ width: 35, height: 35, tintColor:focused ? '#fff' : '#fff' }}></Image>
-                                    </View>
-                                </View>
-                                <View>
-                                    <View style={{ flexDirection: 'row', height: 50, marginBottom: 50 }}>
-                                        <Image source={require('../assets/left.png')} style={{ width: windowWidth*0.3/2, height: 50, alignSelf: 'flex-start', tintColor: '#A4A243' }}></Image>
-                                        <Image source={require('../assets/right.png')} style={{ width: windowWidth*0.3/2, height: 50, alignSelf: 'flex-start', tintColor: '#A4A243'}}></Image>
+                            <View style={{ backgroundColor: '#fff', width: windowWidth * 0.4, alignItems: 'center', paddingBottom: 100, borderTopWidth:2 }}>
+                                <View style={{ position: 'absolute' }}>
+                                    <View style={{ alignSelf: 'center', width: 60, height: 60, borderRadius: 30, backgroundColor: focused ? '#4E6C50' : '#E6CBA8', alignItems: 'center', justifyContent: 'center', borderWidth: 2, shadowColor: '#000' }}>
+                                        <Image source={require('../assets/icons8-business-90.png')} style={{ width: 35, height: 35, tintColor:'#fff' }}></Image>
                                     </View>
                                 </View>
                             </View>
@@ -52,10 +46,10 @@ const HomeScreen = ({ route }) => {
                     title: '',
                     tabBarIcon: ({ focused }) => {
                         return (
-                            <View style={{ backgroundColor: '#A4A243', width: windowWidth*0.4, alignItems: 'center', paddingBottom: 90 }}>
-                                <View style={{width: 50, height: 50, alignItems:'center', justifyContent:'center'}}>
+                            <View style={{ backgroundColor: '#fff', width: windowWidth * 0.4, alignItems: 'center', paddingBottom: 100, borderTopWidth:2 }}>
+                                <View style={{ width: 50, height: 50, alignItems: 'center', justifyContent: 'center' }}>
                                     <View style={{ width: 45, height: 45, borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                        <Image source={require('../assets/icons8-user-90.png')} style={{ width: 40, height: 40, tintColor: focused ? '#383705' : '#fff' }}></Image>
+                                        <Image source={require('../assets/icons8-user-90.png')} style={{ width: 40, height: 40, tintColor: focused ? '#4E6C50' : '#E6CBA8' }}></Image>
                                     </View>
                                 </View>
                             </View>

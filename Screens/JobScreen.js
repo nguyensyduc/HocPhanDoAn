@@ -21,6 +21,7 @@ import { showMessage } from 'react-native-flash-message';
 import Carousel from 'react-native-snap-carousel';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentComment } from "../Store/userSlice";
+import LinearGradient from 'react-native-linear-gradient';
 const JobScreen = ({ navigation, route }) => {
   const [listJobs, setListJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +59,7 @@ const JobScreen = ({ navigation, route }) => {
     getData();
     getDataJob();
     getComment();
+    console.log('userrrr123 ', selector.userInfor);
     LogBox.ignoreAllLogs()
   }, [successAdd]);
   useEffect(() => {
@@ -90,7 +92,7 @@ const JobScreen = ({ navigation, route }) => {
     const response = await request.json();
     let listData = [];
     response.data.map(item => {
-      if (userInfor.name == item.creater) {
+      if (userInfor.name == item.creater || userInfor.name == item.members) {
         listData.push(item)
       }
     })
@@ -98,6 +100,7 @@ const JobScreen = ({ navigation, route }) => {
       setMemberStatus(listData)
       setLoading(false)
     }, 1000)
+    console.log('hahahah12313 ', listData);
   }
   const getComment = async () => {
     const request = await fetch(`${address}comment`, {
@@ -122,6 +125,10 @@ const JobScreen = ({ navigation, route }) => {
   }
 
   const addPlanJob = async () => {
+    if (countEnd == 0 || countStart == 0 || nameJob == '') {
+      Alert.alert('Thông báo', 'Không được bỏ trống thông tin');
+      return;
+    }
     setLoadingAdd(true)
     const body = {
       nameDetailJob: nameJob.trim(),
@@ -129,6 +136,8 @@ const JobScreen = ({ navigation, route }) => {
       status: currentStatus,
       startTime: dateStart,
       endTime: dateEnd,
+      creater: selector.userInfor.name,
+      members: ''
     };
     const request = await fetch(`${address}detailjobs/add`, {
       method: 'POST',
@@ -138,23 +147,19 @@ const JobScreen = ({ navigation, route }) => {
       },
     });
     const res = await request.json();
-    if (countEnd == 0 || countStart == 0 || nameJob == '') {
-      Alert.alert('Thông báo', 'Không được bỏ trống thông tin');
-    } else {
-      if (res.success) {
-        setSuccessAdd(e => e + 1);
-        setShowModalAdd(false);
-        setCountEnd(0);
-        setCountStart(0);
-        setNameJob('');
-        setCurrentJobs({});
-        setCurrentStatus('');
-        showMessage({
-          message: 'Thêm thành công 1 thẻ công việc',
-          type: 'success'
-        })
-        setLoadingAdd(false)
-      }
+    if (res.success) {
+      setSuccessAdd(e => e + 1);
+      setShowModalAdd(false);
+      setCountEnd(0);
+      setCountStart(0);
+      setNameJob('');
+      setCurrentJobs({});
+      setCurrentStatus('');
+      showMessage({
+        message: 'Thêm thành công 1 thẻ công việc',
+        type: 'success'
+      })
+      setLoadingAdd(false)
     }
   };
 
@@ -213,7 +218,7 @@ const JobScreen = ({ navigation, route }) => {
                 setSelectTable(0)
               }
             }}>
-            <Text style={{ width: '80%' }}>{currentJobs.name ? currentJobs.name : 'Yêu cầu'}</Text>
+            <Text style={{ width: '80%', color: '#000' }}>{currentJobs.name ? currentJobs.name : 'Yêu cầu'}</Text>
             {
               selectTable
                 ?
@@ -234,7 +239,7 @@ const JobScreen = ({ navigation, route }) => {
                         activeOpacity={0.8}
                         onPress={() => { setCurrentJobs(item); setSelectTable(0) }}
                         style={{ backgroundColor: '#eee', padding: 10, borderWidth: 2, borderRadius: 10, margin: 5 }}>
-                        <Text>+ {item.name}</Text>
+                        <Text style={{ color: '#000' }}>+ {item.name}</Text>
                       </TouchableOpacity>
                     </>
                   )
@@ -295,7 +300,7 @@ const JobScreen = ({ navigation, route }) => {
                 setSelectStatus(0)
               }
             }}>
-            <Text style={{ width: '80%' }}>
+            <Text style={{ width: '80%', color: '#000' }}>
               {
                 (
                   currentStatus == 'plan'
@@ -328,7 +333,7 @@ const JobScreen = ({ navigation, route }) => {
                         activeOpacity={0.8}
                         onPress={() => { setCurrentStatus(item); setSelectStatus(0) }}
                         style={{ backgroundColor: '#eee', padding: 10, borderWidth: 2, borderRadius: 10, margin: 5 }}>
-                        <Text>+ {item == 'plan' ? 'Những việc cần làm' : (item == 'doing' ? 'Những việc đang làm' : 'Những việc đã làm xong')}</Text>
+                        <Text style={{ color: '#000' }}>+ {item == 'plan' ? 'Những việc cần làm' : (item == 'doing' ? 'Những việc đang làm' : 'Những việc đã làm xong')}</Text>
                       </TouchableOpacity>
                     </>
                   )
@@ -646,7 +651,7 @@ const JobScreen = ({ navigation, route }) => {
                 style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20, width: '10%' }}>
                 <Image source={require('../assets/icons8-close-100.png')} style={{ width: 20, height: 20 }}></Image>
               </TouchableOpacity>
-              <Text style={{ fontSize: 20, fontWeight: '600', width: '75%' }}>{CurrentId.nameDetailJob}</Text>
+              <Text style={{ fontSize: 20, fontWeight: '600', width: '75%', color: '#000' }}>{CurrentId.nameDetailJob}</Text>
             </View>
             <TouchableOpacity
               onPress={() => setShowOptionSeeMore(true)}
@@ -706,7 +711,7 @@ const JobScreen = ({ navigation, route }) => {
           </ReactNativeModal>
           <View style={[styles.seeMoreStyle, { borderBottomWidth: 1, paddingTop: 0, flexDirection: 'row', alignItems: 'center' }]}>
             {/* <Text style={{fontSize:20, fontWeight:'600'}}>Name detail job</Text> */}
-            <Text style={{ fontSize: 17, width: '50%' }}>{itemJob.name}:</Text>
+            <Text style={{ fontSize: 17, width: '50%', color: '#000' }}>{itemJob.name}:</Text>
             <Text style={{ fontSize: 17, width: '50%', color: 'gray' }}>{CurrentId.status == 'plan'
               ? 'Những việc cần làm'
               : (CurrentId.status == 'doing'
@@ -720,17 +725,17 @@ const JobScreen = ({ navigation, route }) => {
           <View style={styles.seeMoreStyle}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
               <Image source={require('../assets/clock.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
-              <Text style={{ fontSize: 16 }}>Bắt đầu: {moment(CurrentId.startTime).format('DD/MM/yyyy')}</Text>
+              <Text style={{ fontSize: 16, color: '#000' }}>Bắt đầu: {moment(CurrentId.startTime).format('DD/MM/yyyy')}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../assets/clock.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
-              <Text style={{ fontSize: 16 }}>Hết hạn: {moment(CurrentId.endTime).format('DD/MM/yyyy')}</Text>
+              <Text style={{ fontSize: 16, color: '#000' }}>Hết hạn: {moment(CurrentId.endTime).format('DD/MM/yyyy')}</Text>
             </View>
           </View>
           <View style={{ height: 10, backgroundColor: 'lightgray' }}></View>
           <View style={styles.seeMoreStyle}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: 16 }}>Thành viên:</Text>
+              <Text style={{ fontSize: 16, color: '#000' }}>Thành viên:</Text>
               <TouchableOpacity
                 onPress={() => setShowInvite(true)}
                 style={{ alignItems: 'center', padding: 5 }}>
@@ -744,7 +749,7 @@ const JobScreen = ({ navigation, route }) => {
                 isVisible={showInvite}>
                 <View style={{ backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 10 }}>
                   <View style={{ borderBottomWidth: 2, marginBottom: 20, marginHorizontal: 40 }}>
-                    <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center' }}>Mời thành viên</Text>
+                    <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center', color: '#000' }}>Mời thành viên</Text>
                   </View>
                   <View style={[styles.inputView, styles.horizontalView]}>
                     <Image
@@ -756,16 +761,16 @@ const JobScreen = ({ navigation, route }) => {
                       style={{ flex: 1, height: 50, fontSize: 20 }}></TextInput>
                   </View>
                   <TouchableOpacity style={[styles.buttonStyle, { alignSelf: 'center', marginTop: 10, paddingVertical: 15, backgroundColor: '#209DBC' }]}>
-                    <Text style={{ fontSize: 17 }}>Mời</Text>
+                    <Text style={{ fontSize: 17, color: '#000' }}>Mời</Text>
                   </TouchableOpacity>
                 </View>
               </ReactNativeModal>
             </View>
-            <Text style={{ fontSize: 16, paddingHorizontal: 10 }}>{itemJob.creater}</Text>
+            <Text style={{ fontSize: 16, paddingHorizontal: 10, color: '#000' }}>{itemJob.creater}</Text>
           </View>
           <View style={{ height: 10, backgroundColor: 'lightgray' }}></View>
           <View style={[styles.seeMoreStyle, { height: Dimensions.get('window').height * 0.4 }]}>
-            <Text style={{ fontSize: 16 }}>Bình luận:</Text>
+            <Text style={{ fontSize: 16, color: '#000' }}>Bình luận:</Text>
             {/* {loadingText ?
               <View>
                 <ActivityIndicator size='large' color='#000'></ActivityIndicator>
@@ -783,12 +788,12 @@ const JobScreen = ({ navigation, route }) => {
                       {item.idDetailJob == CurrentId.idDetailJob
                         ?
                         <View>
-                          <Text style={{ alignSelf: item.username == userInfor.name ? 'flex-end' : 'flex-start' }}>{item.username}</Text>
+                          <Text style={{ alignSelf: item.username == userInfor.name ? 'flex-end' : 'flex-start', color: '#000' }}>{item.username}</Text>
                           <TouchableOpacity
                             onPress={() => seeTimeClick(item.idText)}
                             activeOpacity={0.8}
                             style={{ backgroundColor: item.username == userInfor.name ? '#209DBC' : 'lightgray', alignSelf: item.username == userInfor.name ? 'flex-end' : 'flex-start', padding: 10, borderRadius: 10, marginTop: 5 }}>
-                            <Text>{item.message}</Text>
+                            <Text style={{ color: '#000' }}>{item.message}</Text>
                           </TouchableOpacity>
                           {
                             seeTime[item.idText]
@@ -847,7 +852,7 @@ const JobScreen = ({ navigation, route }) => {
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={{ backgroundColor: '#fff', borderBottomWidth: 2, paddingBottom: 5 }}>
         <View style={[styles.horizontalView, { paddingHorizontal: 10, marginTop: 10, justifyContent: 'space-between' }]}>
-          <Text style={{ fontSize: 20, marginVertical: 10, fontWeight: 'bold', width: '80%' }}>
+          <Text style={{ fontSize: 20, marginVertical: 10, fontWeight: 'bold', width: '80%', color: '#000' }}>
             Thẻ được sắp xếp theo Bảng
           </Text>
           <TouchableOpacity
@@ -873,111 +878,85 @@ const JobScreen = ({ navigation, route }) => {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator color="#209DBC" size="large"></ActivityIndicator>
         </View>
-      ) : listJobs.toString() ? (
+      ) : listJobs.length ? (
         <View style={{ flex: 1 }}>
-          {/* <FlatList
-            data={memberStatus}
-            renderItem={({ item }) => {
-              return (
-                <View style={[styles.jobMainStyle, { paddingBottom: (memberStatus.indexOf(item) + 1) == memberStatus.length ? 110 : 20 }]}>
-                  <View style={{ padding: 10, backgroundColor: 'lightgray' }}>
-                    <View style={{ backgroundColor: '#fff', padding: 10, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderRadius: 10, borderWidth: 2 }}>
-                      <Image source={require('../assets/icons8-new-job-48.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
-                      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#000' }}>{item.name}</Text>
+          {console.log('testlistttttttt ', memberStatus)}
+          {memberStatus.length ?
+            <Carousel
+              data={memberStatus}
+              layout='tinder'
+              layoutCardOffset={20}
+              renderItem={({ item }) => {
+                return (
+                  <View style={[styles.jobMainStyle, { flex: 1, paddingBottom: (memberStatus.indexOf(item) + 1) == memberStatus.length ? 110 : 20, marginTop: 10 }]}>
+                    <View style={{ padding: 10, backgroundColor: 'lightgray', borderRadius: 10 }}>
+                      <View style={{ backgroundColor: '#fff', padding: 10, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderRadius: 10, borderWidth: 2 }}>
+                        <Image source={require('../assets/icons8-business-90.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
+                        <Text style={{ flex: 1, fontSize: 20, fontWeight: 'bold', color: '#000' }}>{item.name}</Text>
+                      </View>
                     </View>
-                  </View>
-                  {
-                    listJobs.map(e => {
-                      if (e.idJob == item.idJobs) {
-                        return (
-                          <TouchableOpacity style={styles.taskStyle}>
-                            <View style={{ width: '70%' }}>
-                              <Text style={{ marginBottom: 10 }}>{e.nameDetailJob}</Text>
-                              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 15, height: 15, marginRight: 10 }}></Image>
-                                <Text style={{ fontSize: 12 }}>{moment(e.startTime).format('DD/MM/yyyy')} - {moment(e.endTime).format('DD/MM/yyyy')}</Text>
-                              </View>
-                            </View>
-                            {new Date().getTime() > new Date(e.endTime) ?
-                              <View style={{ backgroundColor: '#FE897C', width: '25%', padding: 5, paddingVertical: 10, borderRadius: 5, alignItems: 'center' }}>
-                                <Text style={{ fontWeight: '600' }}>Quá hạn</Text>
-                              </View>
-                              : <></>}
-                          </TouchableOpacity>
-                        );
-                      }
-                    })
-                  }
-                </View>
-              );
-            }}
-            keyExtractor={item => `${item.idJobs}`}
-          /> */}
-          <Carousel
-            data={memberStatus}
-            layout='tinder'
-            // layoutCardOffset={20}
-            renderItem={({ item }) => {
-              return (
-                <View style={[styles.jobMainStyle, { paddingBottom: (memberStatus.indexOf(item) + 1) == memberStatus.length ? 110 : 20, marginTop: 10 }]}>
-                  <View style={{ padding: 10, backgroundColor: 'lightgray', borderRadius: 10 }}>
-                    <View style={{ backgroundColor: '#fff', padding: 10, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderRadius: 10, borderWidth: 2 }}>
-                      <Image source={require('../assets/icons8-business-90.png')} style={{ width: 30, height: 30, marginRight: 10 }}></Image>
-                      <Text style={{ flex: 1, fontSize: 20, fontWeight: 'bold', color: '#000' }}>{item.name}</Text>
-                    </View>
-                  </View>
-                  <ScrollView>
-                    {showModalSeeMoreJob()}
-                    <View style={{ paddingBottom: 150 }}>
-                      {
-                        listJobs.map(e => {
-                          if (e.idJob == item.idJobs) {
-                            return (
-                              <TouchableOpacity
-                                onPress={() => {
-                                  setSeeMoreJob(true); setCurrentId(e); setItemJob(item);
-                                  // setTimeout(() => {
-                                  //   reff.current._listRef._scrollRef.scrollToEnd(listComment.length)
-                                  // }, 100);
-                                }}
-                                style={styles.taskStyle}>
-                                <View style={{ width: '70%' }}>
-                                  <Text style={{ marginBottom: 10 }}>{e.nameDetailJob}</Text>
-                                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 15, height: 15, marginRight: 10 }}></Image>
-                                    <Text style={{ fontSize: 12 }}>{moment(e.startTime).format('DD/MM/yyyy')} - {moment(e.endTime).format('DD/MM/yyyy')}</Text>
-                                  </View>
-                                </View>
-                                {e.status != 'done' ?
-                                  new Date().getTime() > new Date(e.endTime) ?
-                                    <View style={{ backgroundColor: '#FE897C', width: '25%', padding: 5, paddingVertical: 10, borderRadius: 5, alignItems: 'center' }}>
-                                      <Text style={{ fontWeight: '600' }}>Quá hạn</Text>
+                    <ScrollView style={{ flex: 1 }}>
+                      {showModalSeeMoreJob()}
+                      <View style={{ paddingBottom: 150, flex: 1 }}>
+                        {
+                          listJobs.map(e => {
+                            if (e.idJob == item.idJobs && (e.members ? (e.members == selector.userInfor.name) : (e.creater == selector.userInfor.name))) {
+                              return (
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setSeeMoreJob(true); setCurrentId(e); setItemJob(item);
+                                    // setTimeout(() => {
+                                    //   reff.current._listRef._scrollRef.scrollToEnd(listComment.length)
+                                    // }, 100);
+                                  }}
+                                  style={styles.taskStyle}>
+                                  <View style={{ width: '70%' }}>
+                                    <Text style={{ marginBottom: 10, color: '#000' }}>{e.nameDetailJob}</Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                      <Image source={require('../assets/icons8-calendar-50.png')} style={{ width: 15, height: 15, marginRight: 10 }}></Image>
+                                      <Text style={{ fontSize: 12, color: '#000' }}>{moment(e.startTime).format('DD/MM/yyyy')} - {moment(e.endTime).format('DD/MM/yyyy')}</Text>
                                     </View>
+                                  </View>
+                                  {e.status != 'done' ?
+                                    new Date().setHours(0, 0, 0, 0) > new Date(e.endTime).setHours(0, 0, 0, 0) ?
+                                      <View style={{ backgroundColor: '#FE897C', width: '25%', padding: 5, paddingVertical: 10, borderRadius: 5, alignItems: 'center' }}>
+                                        <Text style={{ fontWeight: '600', color: '#000' }}>Quá hạn</Text>
+                                      </View>
+                                      :
+                                      <></>
                                     :
-                                    <></>
-                                  :
-                                  <View style={{ borderWidth: 1, width: '25%', padding: 5, paddingVertical: 10, borderRadius: 5, alignItems: 'center' }}>
-                                    <Text style={{ fontWeight: '600' }}>Xong</Text>
-                                  </View>}
-                              </TouchableOpacity>
-                            );
-                          }
-                        })
-                      }
-                    </View>
-                  </ScrollView>
-                </View>
-              );
-            }}
-            sliderWidth={Dimensions.get('window').width}
-            itemWidth={Dimensions.get('window').width * 0.9} />
+                                    <View style={{ borderWidth: 1, width: '25%', padding: 5, paddingVertical: 10, borderRadius: 5, alignItems: 'center' }}>
+                                      <Text style={{ fontWeight: '600', color: '#000' }}>Xong</Text>
+                                    </View>}
+                                </TouchableOpacity>
+                              );
+                            }
+                          })
+                        }
+                      </View>
+                    </ScrollView>
+                  </View>
+                );
+              }}
+              sliderWidth={Dimensions.get('window').width}
+              itemWidth={Dimensions.get('window').width * 0.9} />
+            :
+            <View style={{ flex: 1, alignItems: 'center', marginTop: 100 }}>
+              <Image
+                source={require('../assets/icons8-sad-80.png')}
+                style={{ width: 80, height: 80, marginBottom: 20 }}></Image>
+              <Text style={{ fontSize: 18, color: '#000' }}>
+                Hiện tại chưa có bất kì thẻ công việc nào
+              </Text>
+            </View>
+          }
         </View>
       ) : (
         <View style={{ flex: 1, alignItems: 'center', marginTop: 100 }}>
           <Image
             source={require('../assets/icons8-sad-80.png')}
             style={{ width: 80, height: 80, marginBottom: 20 }}></Image>
-          <Text style={{ fontSize: 18 }}>
+          <Text style={{ fontSize: 18, color: '#000' }}>
             Hiện tại chưa có bất kì thẻ công việc nào
           </Text>
         </View>

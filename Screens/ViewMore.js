@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useSelector } from "react-redux";
 import { ReactNativeModal } from 'react-native-modal'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const ViewMoreScreen = ({ navigation, route }) => {
     const [showLogout, setShowLogout] = useState(false)
+    const selector = useSelector((state)=> state.user)
     const showModalLogout = () => {
         return (
             <ReactNativeModal
@@ -20,7 +22,12 @@ const ViewMoreScreen = ({ navigation, route }) => {
                             <Text style={{ color: 'red', fontWeight: 'bold' }}>Huỷ</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => navigation.navigate('LoginScreen')}
+                            onPress={async() => {
+                                await AsyncStorage.removeItem('account');
+                                await AsyncStorage.removeItem('password');
+                                setShowLogout(false)
+                                navigation.navigate('OptionHome')
+                            }}
                             style={[styles.buttonStyle, { borderColor: 'green' }]}>
                             <Text style={{ color: 'green', fontWeight: 'bold' }}>Đồng ý</Text>
                         </TouchableOpacity>
@@ -32,12 +39,13 @@ const ViewMoreScreen = ({ navigation, route }) => {
     }
     return (
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
-            <View style={{backgroundColor:'#fff', padding:15, borderBottomLeftRadius:30, borderBottomRightRadius:30, shadowColor:'#000', shadowRadius:10, shadowOpacity:0.3, shadowOffset:{width:0, height:10}, elevation:5, marginBottom:40}}>
+            <View style={{ backgroundColor: '#fff', padding: 15, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, shadowColor: '#000', shadowRadius: 10, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 10 }, elevation: 5, marginBottom: 40 }}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('InforUserScreen', { userInfor: route.params.getParams })}
                     style={{ backgroundColor: '#fff', alignSelf: 'center', borderRadius: 120 / 2, borderWidth: 2, width: 110, height: 110, alignItems: 'center', justifyContent: 'center' }}>
                     <Image source={require('../assets/icons8-user-90.png')} style={{ width: 70, height: 70, tintColor: '#000' }}></Image>
                 </TouchableOpacity>
+                <Text style={{textAlign:'center', fontSize:20, marginTop:15, fontWeight:'bold'}}>{selector.userInfor.username}</Text>
             </View>
 
             <TouchableOpacity
