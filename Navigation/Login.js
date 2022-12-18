@@ -62,7 +62,7 @@ const LoginScreen = ({ route, navigation }) => {
             
         }
         else {
-            Alert.alert('Vui lòng kiểm tra lại tại khoản hoặc mật khẩu')
+            Alert.alert('Vui lòng kiểm tra lại tại khoản hoặc mật khẩu!')
         }
 
     }
