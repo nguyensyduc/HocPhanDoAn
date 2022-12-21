@@ -41,7 +41,8 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
     useEffect(() => {
         getDataPlan()
         getComment()
-        console.log('idJobssssssss ', selector.userInfor);
+        console.log('idJobssssssss ', selector.userInfor.name);
+        console.log('idJobssssssss 123', inforJob.creater);
     }, [successAdd])
 
     const getDataPlan = async () => {
@@ -143,7 +144,7 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
 
     }
     const PickEndDate = () => {
-        loadingText(true)
+        // loadingText(true)
         if (countEnd > 0 || countStart > 0) {
             if (dateEnd < dateStart) {
                 Alert.alert('Thông báo', 'Ngày kết thúc phải lớn hơn ngày bắt đầu')
@@ -270,6 +271,17 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                             :
                             <></>
                     }
+
+                    {selector.userInfor.name == inforJob.creater ?
+                        <TouchableOpacity
+                            // onPress={() => deleteJobs()}
+                            style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
+                            <Image source={require('../assets/icons8-remove-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Xoá thẻ công việc</Text>
+                        </TouchableOpacity>
+                        :
+                        null
+                    }
                     {/* <TouchableOpacity
                         style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
                         <Image source={require('../assets/icons8-remove-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
@@ -385,12 +397,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                             <Text style={{ fontSize: 20, fontWeight: '600', width: '75%', color: '#000' }}>{CurrentId.nameDetailJob}</Text>
                         </View>
                         <TouchableOpacity
-                            onPress={() => setShowOptionSeeMore(true)}
+                            onPress={() => setShowModalChange(true)}
                             style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                             <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
                         </TouchableOpacity>
                     </View>
-                    <ReactNativeModal
+                    {/* <ReactNativeModal
                         animationIn='fadeInDown'
                         backdropOpacity={0.5}
                         onBackdropPress={() => setShowOptionSeeMore(false)}
@@ -439,7 +451,8 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Xoá thẻ công việc</Text>
                             </TouchableOpacity>
                         </View>
-                    </ReactNativeModal>
+                    </ReactNativeModal> */}
+                    {showOption()}
                     <View style={[styles.seeMoreStyle, { borderBottomWidth: 1, paddingTop: 0, flexDirection: 'row', alignItems: 'center' }]}>
                         {/* <Text style={{fontSize:20, fontWeight:'600'}}>Name detail job</Text> */}
                         <Text style={{ fontSize: 17, width: '50%', color: '#000' }}>{inforJob.name}:</Text>
