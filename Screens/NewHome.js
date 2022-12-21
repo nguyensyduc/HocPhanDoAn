@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, Dimensions, Image, StyleSheet, StatusBar, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, Dimensions, Image, StyleSheet, StatusBar, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from "react-redux";
 import address from "../IPAddress/AddressConfig";
 import ReactNativeModal from "react-native-modal";
@@ -33,10 +33,16 @@ const NewHomeScreen = ({ navigation, route }) => {
         const response = await request.json();
         let listData = [];
         response.data.map(item => {
-            if (userInfor.name == item.creater || userInfor.name == item.members) {
+            if (userInfor.name == item.creater) {
                 listData.push(item)
             }
+            item.members.map(e => {
+                if (userInfor.name == e) {
+                    listData.push(item)
+                }
+            })
         })
+        console.log('listt dataaa ', response.data);
         setTimeout(() => {
             setMemberStatus(listData)
             setLoading(false)
@@ -44,27 +50,30 @@ const NewHomeScreen = ({ navigation, route }) => {
     }
 
     const addJob = async () => {
-        const body = {
-            "name": nameJob.trim(),
-            "creater": userInfor.name,
-            "members": []
-        }
-        const request = await fetch(`${address}jobs/add`, {
-            method: 'POST',
-            body: JSON.stringify(body),
-            headers: {
-                'Content-type': 'application/json'
-            }
-        })
-        const res = await request.json();
         if (nameJob == '') {
             Alert.alert('Thông báo', 'Không được bỏ trống thông tin')
         }
         else {
-            setSuccessAdd(e => e + 1);
+            const body = {
+                "name": nameJob.trim(),
+                "creater": userInfor.name,
+                "members": []
+            }
+            const request = await fetch(`${address}jobs/add`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            const res = await request.json();
             if (res.success) {
+                setSuccessAdd(e => e + 1);
                 setShowModalAdd(false);
                 setNameJob('')
+            }
+            else{
+                Alert.alert('Them that bai')
             }
         }
     }

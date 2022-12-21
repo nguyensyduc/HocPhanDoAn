@@ -48,7 +48,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
         getDataPlan();
         getComment();
         getListUser();
-        console.log('listttttttt123 ', selector.listUser);
+        console.log('listttttttt123 ', inforJob.creater);
     }, [successAdd]);
 
     useEffect(() => {
@@ -809,14 +809,20 @@ const DetailJobsScreen = ({ navigation, route }) => {
                         keyExtractor={(item, index) => `${index}`}
                     />
                 }
-                <View style={{ paddingHorizontal: 50 }}>
-                    <TouchableOpacity
-                        onPress={() => setShowInvite(true)}
-                        style={{ margin: 5, alignItems: 'center', padding: 10, borderWidth: 1, borderRadius: 5 }}>
-                        <Text>Mời thành viên</Text>
-                    </TouchableOpacity>
-                    {showModalInvite()}
-                </View>
+
+
+                {
+                    inforJob.creater == selector.userInfor.name ?
+                        <View style={{ paddingHorizontal: 50 }}>
+                            <TouchableOpacity
+                                onPress={() => setShowInvite(true)}
+                                style={{ margin: 5, alignItems: 'center', padding: 10, borderWidth: 1, borderRadius: 5 }}>
+                                <Text>Mời thành viên</Text>
+                            </TouchableOpacity>
+                            {showModalInvite()}
+                        </View>
+                        : null
+                }
             </View>
         </SafeAreaView>
     )

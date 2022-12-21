@@ -17,7 +17,6 @@ const LoginScreen = ({ route, navigation }) => {
     const reff = useRef()
     const changeStatus = route && route.params && route.params.changeStatus ? route.params.changeStatus : null;
     useEffect(() => {
-        console.log('dasdyasd ', `${address}account`);
         fetchData();
     }, [
         state, changeStatus
