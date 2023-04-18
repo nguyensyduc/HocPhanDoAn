@@ -151,7 +151,8 @@ const DetailJobsScreen = ({ navigation, route }) => {
             showMessage({
                 message: `Mời thành công ${currentMember.username} vào ${inforJob.name}`,
                 type: 'success',
-                duration: 4000
+                duration: 4000,
+                style: { paddingTop: 30 }
             })
         }
     }
@@ -757,7 +758,7 @@ const DetailJobsScreen = ({ navigation, route }) => {
                                 onPress={() => {
                                     const payload = { currentUser: item }
                                     dispatch(setCurrentUserDetail(payload))
-                                    navigation.navigate('DetailJobsUserScreen', { inforJob: inforJob, itemUser: item });
+                                    navigation.navigate('DetailJobsUserScreen', { inforJob: inforJob, itemUser: item, listUser: listUserName });
                                 }}
                                 style={styles.userStyle}>
                                 <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#000' }}>{item.username} {item.name == userInfor.name ? '(Bạn)' : ''}</Text>

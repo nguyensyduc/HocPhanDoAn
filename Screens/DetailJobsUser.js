@@ -38,6 +38,8 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
     const [showInvite, setShowInvite] = useState(false)
     const [textComment, setTextComment] = useState('');
     const [loadingText, setLoadingText] = useState(false)
+    const [showDelete, setShowDelete] = useState(false)
+    const listUserName = route.params.listUser
     useEffect(() => {
         getDataPlan()
         getComment()
@@ -222,6 +224,97 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
         }
     }
 
+    const deleteJobs = () => {
+        LogBox.ignoreAllLogs()
+        Alert.alert('Thông báo', 'Bạn có muốn xoá thẻ công việc này không?', [
+            {
+                text: 'Đồng ý',
+                onPress: () => {
+                    const doDelete = async () => {
+                        const request = await fetch(`${address}detailjobs/delete/${CurrentId.idDetailJob}`, {
+                            method: 'DELETE'
+                        })
+                        const res = await request.json();
+                        if (res.success) {
+                            setSuccessAdd(e => e + 1);
+                            setShowModalChange(false)
+                            // setTimeout(() => {
+                            //     setSeeMoreJob(false)
+                            // }, 500);
+                            showMessage({
+                                message: 'Xoá thành công',
+                                type: 'success',
+                                style: {
+                                    paddingTop: 30
+                                }
+                            })
+                        }
+                    }
+                    doDelete();
+                }
+            },
+            {
+                text: 'Huỷ',
+                onPress: () => {
+
+                }
+            }
+        ])
+    }
+
+    const deleteUser = async () => {
+        const request = await fetch(`${address}jobs`, {
+            method: 'GET',
+        })
+        const response = await request.json();
+        let listMember = []
+        response.data.map(e => {
+            if (e.idJobs == inforJob.idJobs) {
+                listMember = e.members;
+                return;
+            }
+        })
+        console.log('listtt membersss ', listMember, userItem);
+        console.log('okeeeeeeeee 123', inforJob);
+        listMember.map((item, index) => {
+            if (item == userItem.name) {
+                listMember.splice(index, 1)
+            }
+        })
+        console.log('list sau remove ', listMember);
+        const body = {
+            "members": listMember
+        }
+        const _request = await fetch(`${address}jobs/edit/${inforJob.idJobs}`, {
+            method: 'PUT',
+            body: JSON.stringify(body),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        })
+        const res = await _request.json();
+        console.log('resssssss ', res);
+        if (res.success) {
+            setShowDelete(false)
+            // setSuccessInvited(e => e + 1);
+            navigation.navigate('NewHomeScreen')
+            showMessage({
+                message: `Xoá thành công!`,
+                type: 'success',
+                duration: 4000,
+                style: { paddingTop: 30 }
+            })
+        }
+        else {
+            showMessage({
+                message: `Có lỗi xảy ra!`,
+                type: 'error',
+                duration: 4000,
+                style: { paddingTop: 30 }
+            })
+        }
+    }
+
     const showOption = () => {
         return (
             <ReactNativeModal
@@ -274,7 +367,7 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
 
                     {selector.userInfor.name == inforJob.creater ?
                         <TouchableOpacity
-                            // onPress={() => deleteJobs()}
+                            onPress={() => deleteJobs()}
                             style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
                             <Image source={require('../assets/icons8-remove-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
                             <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Xoá thẻ công việc</Text>
@@ -396,65 +489,14 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                             </TouchableOpacity>
                             <Text style={{ fontSize: 20, fontWeight: '600', width: '75%', color: '#000' }}>{CurrentId.nameDetailJob}</Text>
                         </View>
-                        <TouchableOpacity
+                        {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                             onPress={() => setShowModalChange(true)}
                             style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                             <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                        </TouchableOpacity>
+                        </TouchableOpacity> : null}
                     </View>
-                    {/* <ReactNativeModal
-                        animationIn='fadeInDown'
-                        backdropOpacity={0.5}
-                        onBackdropPress={() => setShowOptionSeeMore(false)}
-                        style={{ width: Dimensions.get('window').width, alignSelf: 'center' }}
-                        isVisible={showOptionSeeMore}>
-                        <View style={{ backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 10 }}>
-                            {
-                                CurrentId.status != 'done'
-                                    ?
-                                    <TouchableOpacity
-                                        // onPress={() => doneJobs('done')}
-                                        style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
-                                        <Image source={require('../assets/icons8-ok-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Đã hoàn thành</Text>
-                                    </TouchableOpacity>
-                                    :
-                                    <></>
-                            }
-                            {
-                                CurrentId.status != 'plan'
-                                    ?
-                                    <TouchableOpacity
-                                        style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
-                                        <Image source={require('../assets/icons8-work-64.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Thêm vào mục cần làm</Text>
-                                    </TouchableOpacity>
-                                    :
-                                    <></>
-                            }
-                            {
-                                CurrentId.status != 'doing'
-                                    ?
-                                    <TouchableOpacity
-                                        // onPress={() => doneJobs('doing')}
-                                        style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
-                                        <Image source={require('../assets/icons8-tools-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Thêm vào mục đang làm</Text>
-                                    </TouchableOpacity>
-                                    :
-                                    <></>
-                            }
-                            <TouchableOpacity
-                                // onPress={() => deleteJobs()}
-                                style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
-                                <Image source={require('../assets/icons8-remove-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
-                                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Xoá thẻ công việc</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </ReactNativeModal> */}
                     {showOption()}
                     <View style={[styles.seeMoreStyle, { borderBottomWidth: 1, paddingTop: 0, flexDirection: 'row', alignItems: 'center' }]}>
-                        {/* <Text style={{fontSize:20, fontWeight:'600'}}>Name detail job</Text> */}
                         <Text style={{ fontSize: 17, width: '50%', color: '#000' }}>{inforJob.name}:</Text>
                         <Text style={{ fontSize: 17, width: '50%', color: 'gray' }}>{CurrentId.status == 'plan'
                             ? 'Những việc cần làm'
@@ -477,54 +519,13 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                         </View>
                     </View>
                     <View style={{ height: 10, backgroundColor: 'lightgray' }}></View>
-                    {/* <View style={styles.seeMoreStyle}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text style={{ fontSize: 16, color: '#000' }}>Tiến độ:</Text>
-                            <TouchableOpacity
-                                // onPress={() => setShowInvite(true)}
-                                style={{ alignItems: 'center', padding: 5 }}>
-                                <Text style={{ color: '#2198EC' }}>+ Mời</Text>
-                            </TouchableOpacity>
-                            <ReactNativeModal
-                                animationIn='fadeInDown'
-                                backdropOpacity={0.5}
-                                // onBackdropPress={() => setShowInvite(false)}
-                                style={{ width: Dimensions.get('window').width, alignSelf: 'center' }}
-                                isVisible={showInvite}>
-                                <View style={{ backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 10 }}>
-                                    <View style={{ borderBottomWidth: 2, marginBottom: 20, marginHorizontal: 40 }}>
-                                        <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center', color: '#000' }}>Mời thành viên</Text>
-                                    </View>
-                                    <View style={[styles.inputView, styles.horizontalView]}>
-                                        <Image
-                                            source={require('../assets/search.png')}
-                                            style={{ width: 30, height: 30, marginRight: 20 }}></Image>
-                                        <TextInput
-                                            placeholderTextColor="#696767"
-                                            placeholder="Nhập tên..."
-                                            style={{ flex: 1, height: 50, fontSize: 20 }}></TextInput>
-                                    </View>
-                                    <TouchableOpacity style={[styles.buttonStyle, { alignSelf: 'center', marginTop: 10, paddingVertical: 15, backgroundColor: '#209DBC' }]}>
-                                        <Text style={{ fontSize: 17, color: '#000' }}>Mời</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </ReactNativeModal>
-                        </View>
-                        <Text style={{ fontSize: 16, paddingHorizontal: 10, color: '#000' }}>{inforJob.creater}</Text>
-                    </View> */}
                     <View style={{ height: 10, backgroundColor: 'lightgray' }}></View>
                     <View style={[styles.seeMoreStyle, { height: Dimensions.get('window').height * 0.4 }]}>
                         <Text style={{ fontSize: 16, color: '#000' }}>Bình luận:</Text>
-                        {/* {loadingText ?
-                            <View>
-                                <ActivityIndicator size='large' color='#000'></ActivityIndicator>
-                            </View>
-                            : */}
                         <View>
                             <FlatList
                                 data={selector.listText}
                                 style={{ paddingBottom: 20 }}
-                                // ref={(c) => reff.current = c}
                                 inverted={true}
                                 renderItem={({ item }) => {
                                     return (
@@ -534,7 +535,6 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 <View>
                                                     <Text style={{ alignSelf: item.username == selector.userInfor.name ? 'flex-end' : 'flex-start', color: '#000' }}>{item.username}</Text>
                                                     <TouchableOpacity
-                                                        // onPress={() => seeTimeClick(item.idText)}
                                                         activeOpacity={0.8}
                                                         style={{ backgroundColor: item.username == selector.userInfor.name ? '#209DBC' : 'lightgray', alignSelf: item.username == selector.userInfor.name ? 'flex-end' : 'flex-start', padding: 10, borderRadius: 10, marginTop: 5 }}>
                                                         <Text style={{ color: '#000' }}>{item.message}</Text>
@@ -565,7 +565,6 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                     )
                                 }} />
                         </View>
-                        {/* } */}
                     </View>
                     <View style={[styles.seeMoreStyle, { flexDirection: 'row', alignItems: 'center' }]}>
                         <TextInput value={textComment} onChangeText={(textComment) => setTextComment(textComment)} placeholderTextColor='gray' placeholder="Bình luận..." style={[styles.inputStyle, { backgroundColor: 'lightgray', marginHorizontal: 10, flex: 1 }]}></TextInput>
@@ -581,7 +580,6 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                     <Image source={require('../assets/icons8-send-64.png')} style={{ width: 35, height: 35 }}></Image>
                                 </TouchableOpacity>
                             )
-
                             :
                             <></>
                         }
@@ -623,12 +621,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 style={[styles.taskStyle]}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                                                     <Text style={{ fontSize: 16, width: '85%', color: '#000' }}>{item.nameDetailJob}</Text>
-                                                    <TouchableOpacity
+                                                    {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                                                         onPress={() => { setShowModalChange(true); setCurrentId(item) }}
                                                         // onPress={() => console.log(item.idDetailJob)}
                                                         style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                                                         <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                    </TouchableOpacity>
+                                                    </TouchableOpacity> : null}
                                                     {showOption()}
                                                 </View>
                                                 <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
@@ -648,12 +646,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 style={[styles.taskStyle]}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                                                     <Text style={{ fontSize: 16, width: '85%', color: '#000' }}>{item.nameDetailJob}</Text>
-                                                    <TouchableOpacity
+                                                    {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                                                         onPress={() => { setShowModalChange(true); setCurrentId(item) }}
                                                         // onPress={() => console.log(item.idDetailJob)}
                                                         style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                                                         <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                    </TouchableOpacity>
+                                                    </TouchableOpacity> : null}
                                                     {showOption()}
                                                 </View>
                                                 <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
@@ -700,12 +698,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 style={[styles.taskStyle]}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                                                     <Text style={{ fontSize: 16, width: '85%', color: '#000' }}>{item.nameDetailJob}</Text>
-                                                    <TouchableOpacity
+                                                    {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                                                         onPress={() => { setShowModalChange(true); setCurrentId(item) }}
                                                         // onPress={() => console.log(item.idDetailJob)}
                                                         style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                                                         <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                    </TouchableOpacity>
+                                                    </TouchableOpacity> : null}
                                                     {showOption()}
                                                 </View>
                                                 <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
@@ -725,12 +723,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 style={[styles.taskStyle]}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                                                     <Text style={{ fontSize: 16, width: '85%', color: '#000' }}>{item.nameDetailJob}</Text>
-                                                    <TouchableOpacity
+                                                    {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                                                         onPress={() => { setShowModalChange(true); setCurrentId(item) }}
                                                         // onPress={() => console.log(item.idDetailJob)}
                                                         style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                                                         <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                    </TouchableOpacity>
+                                                    </TouchableOpacity> : null}
                                                     {showOption()}
                                                 </View>
                                                 <View style={[styles.timeLineStyle, { backgroundColor: new Date().getTime() > new Date(item.endTime) ? '#FE897C' : '#fff' }]}>
@@ -777,12 +775,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 style={[styles.taskStyle]}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                                                     <Text style={{ fontSize: 16, width: '85%', color: '#000' }}>{item.nameDetailJob}</Text>
-                                                    <TouchableOpacity
+                                                    {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                                                         onPress={() => { setShowModalChange(true); setCurrentId(item) }}
                                                         // onPress={() => console.log(item.idDetailJob)}
                                                         style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                                                         <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                    </TouchableOpacity>
+                                                    </TouchableOpacity> : null}
                                                     {showOption()}
                                                 </View>
                                                 <View style={[styles.timeLineStyle]}>
@@ -802,12 +800,12 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                                                 style={[styles.taskStyle]}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                                                     <Text style={{ fontSize: 16, width: '85%', color: '#000' }}>{item.nameDetailJob}</Text>
-                                                    <TouchableOpacity
+                                                    {selector.userInfor.name == inforJob.creater || userItem.name == selector.userInfor.name ? <TouchableOpacity
                                                         onPress={() => { setShowModalChange(true); setCurrentId(item) }}
                                                         // onPress={() => console.log(item.idDetailJob)}
                                                         style={{ width: '10%', alignItems: 'center', padding: 5 }}>
                                                         <Image source={require('../assets/icons8-ellipsis-30.png')} style={{ width: 15, height: 15 }}></Image>
-                                                    </TouchableOpacity>
+                                                    </TouchableOpacity> : null}
                                                     {showOption()}
                                                 </View>
                                                 <View style={[styles.timeLineStyle]}>
@@ -823,6 +821,35 @@ const DetailJobsUserScreen = ({ navigation, route }) => {
                     }
                 </View>
             </Swiper>
+            {
+                inforJob.creater == selector.userInfor.name ?
+                    <View style={{ paddingHorizontal: 50 }}>
+                        <TouchableOpacity
+                            onPress={() => setShowDelete(true)}
+                            style={{ margin: 5, alignItems: 'center', padding: 10, borderWidth: 1, borderRadius: 5 }}>
+                            <Text>Xoá thành viên</Text>
+                        </TouchableOpacity>
+                        {/* {showModalInvite()} */}
+                        <ReactNativeModal isVisible={showDelete}>
+                            <View style={{ backgroundColor: '#fff', padding: 10, borderRadius: 5 }}>
+                                <Text style={{ textAlign: 'center', fontSize: 18 }}>Bạn có muốn xoá người dùng này khỏi dự án không?</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                    <TouchableOpacity
+                                        onPress={() => deleteUser()}
+                                        style={{ margin: 10 }}>
+                                        <Text style={{ fontSize: 16, color: 'green' }}>Đồng ý</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => setShowDelete(false)}
+                                        style={{ margin: 10 }}>
+                                        <Text style={{ fontSize: 16, color: 'red' }}>Huỷ</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </ReactNativeModal>
+                    </View>
+                    : null
+            }
             <View style={{ paddingHorizontal: 30, marginBottom: 20 }}>
                 <Text style={{ color: 'red', fontStyle: 'italic', marginBottom: 10, fontSize: 15 }}>* Lưu ý:</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10 }}>

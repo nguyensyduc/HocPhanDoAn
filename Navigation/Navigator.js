@@ -10,15 +10,17 @@ import DetailJobs from "../Screens/DetailJobs";
 import { useSelector } from "react-redux";
 import LinearGradient from "react-native-linear-gradient";
 import DetailJobsUserScreen from "../Screens/DetailJobsUser";
+import TestAminated from "../Screens/TestAminated";
 const Stack = createNativeStackNavigator();
 const NavigatorScreen = () => {
     const selector = useSelector((state) => state.user)
     return (
         <Stack.Navigator>
+            <Stack.Screen name="TestAminated" component={TestAminated} options={{ headerShown: false }}></Stack.Screen>
             <Stack.Screen name="OptionHome" component={OptionHome} options={{ headerShown: false }}></Stack.Screen>
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }}></Stack.Screen>
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}></Stack.Screen>
-            <Stack.Screen name="HomeScreen" component={HomeScreen} options={{
+            <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ 
                 // headerBackVisible: false,
                 // title: 'Workflow management',
                 // headerTitleStyle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },

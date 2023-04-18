@@ -91,11 +91,16 @@ const JobScreen = ({ navigation, route }) => {
     })
     const response = await request.json();
     let listData = [];
+    console.log('hahahahdsdhsubfusbf1', response.data);
     response.data.map(item => {
-      if (userInfor.name == item.creater || userInfor.name == item.members) {
-        listData.push(item)
-      }
+      item.members.map(e => {
+        console.log('hahahahdsdhsubfusbf', userInfor.name, item.creater, userInfor.name, e);
+        if (userInfor.name == item.creater || userInfor.name == e) {
+          listData.push(item)
+        }
+      })
     })
+    // console.log();
     setTimeout(() => {
       setMemberStatus(listData)
       setLoading(false)
@@ -701,12 +706,14 @@ const JobScreen = ({ navigation, route }) => {
                   :
                   <></>
               }
-              <TouchableOpacity
-                onPress={() => deleteJobs()}
-                style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
-                <Image source={require('../assets/icons8-remove-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Xoá thẻ công việc</Text>
-              </TouchableOpacity>
+              {selector.userInfor.name == CurrentId.creater ?
+                <TouchableOpacity
+                  onPress={() => deleteJobs()}
+                  style={{ margin: 20, marginBottom: 5, padding: 15, alignItems: 'center', borderRadius: 10, borderWidth: 2, flexDirection: 'row' }}>
+                  <Image source={require('../assets/icons8-remove-100.png')} style={{ width: 30, height: 30, tintColor: '#000', marginRight: 10 }}></Image>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>Xoá thẻ công việc</Text>
+                </TouchableOpacity>
+                : null}
             </View>
           </ReactNativeModal>
           <View style={[styles.seeMoreStyle, { borderBottomWidth: 1, paddingTop: 0, flexDirection: 'row', alignItems: 'center' }]}>
@@ -880,7 +887,7 @@ const JobScreen = ({ navigation, route }) => {
         </View>
       ) : listJobs.length ? (
         <View style={{ flex: 1 }}>
-          {console.log('testlistttttttt ', memberStatus)}
+          {console.log('testlistttttttt ', memberStatus, listJobs)}
           {memberStatus.length ?
             <Carousel
               data={memberStatus}
